@@ -1,0 +1,543 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Home{% endblock title %}
+
+
+
+{% block content %}
+<link rel="stylesheet" href="/media/css/home.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+    /* Floating button style */
+    #floating-ad-button {
+        position: fixed;
+        bottom: 140px;
+        left: 20px;
+        width: 30px;  /* Increased size for a better look */
+        height: 30px;
+        background-color: #f6e6e6; /* Default background color */
+        border-radius: 50%;
+        box-shadow: 0 0 30px rgba(255, 80, 80, 0.6), 0 0 60px rgba(255, 80, 80, 0.4); /* Initial shadow */
+        cursor: pointer;
+        z-index: 9999; /* Above all other content */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        user-select: none; /* Prevent text selection */
+        animation: glow 1.5s infinite alternate; /* Animation for glowing effect */
+    }
+
+    /* Keyframes for glowing animation */
+    @keyframes glow {
+        0% {
+            box-shadow: 0 0 45px rgba(0, 255, 153, 0.6), 0 0 75px rgba(0, 255, 153, 0.4);
+            transform: scale(1); /* Normal size */
+        }
+        100% {
+            box-shadow: 0 0 60px rgba(0, 255, 153, 1), 0 0 95px rgba(0, 255, 153, 0.8);
+            transform: scale(1.3); /* Slightly enlarged */
+        }
+    }
+
+    /* Image inside the button */
+    #floating-ad-button img.ad-img {
+        width: 90%; /* Adjusted for better centering */
+        height: 90%; /* Adjusted for better centering */
+        object-fit: cover;
+        border-radius: 50%; /* Keep the image circular */
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Shadow for depth */
+    }
+
+    /* Hover effect */
+    #floating-ad-button:hover {
+        animation: glow 1s infinite alternate; /* Slightly faster glow on hover */
+        box-shadow: 0 0 70px rgba(255, 80, 80, 1), 0 0 100px rgba(255, 80, 80, 0.6); /* Enhanced shadow on hover */
+    }
+    #floating-ad-button::after {
+        content: "MCQwave TEA"; /* Text to display */
+        position: absolute;
+        bottom: 100%; /* Position above the button */
+        right: 50%; /* Center it horizontally */
+        transform: translateX(50%); /* Adjust to center */
+        background-color: rgba(0, 0, 0, 0.7); /* Background color */
+        color: #fff; /* Text color */
+        padding: 5px 10px; /* Padding around text */
+        border-radius: 5px; /* Rounded corners */
+        font-size: 12px; /* Text size */
+        white-space: nowrap; /* Prevent line breaks */
+        opacity: 0; /* Start hidden */
+        transition: opacity 0.3s ease; /* Fade effect */
+        z-index: 10; /* Above the button */
+    }
+
+    /* Show text on hover */
+    #floating-ad-button:hover::after {
+        opacity: 1; /* Fade in text */
+    }
+</style>
+
+<style>
+    .qod-container {
+        max-width: 800px;
+        margin: 20px auto;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .qod-header {
+        background: linear-gradient(135deg, #004aad, #B91C1C);
+        color: white;
+        padding: 20px;
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        position: relative;
+    }
+    
+    .qod-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #22c55e, #3b82f6);
+    }
+    
+    .qod-content {
+        padding: 25px;
+        min-height: 300px;
+    }
+    
+    .loader {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 300px;
+    }
+    
+    .loader-spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #3b82f6;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .question-text {
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+        line-height: 1.6;
+    }
+    
+    .question-image {
+        max-width: 100%;
+        height: auto;
+        margin: 15px 0;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .options-container {
+        display: grid;
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .option {
+        padding: 15px;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: white;
+    }
+    
+    .option:hover {
+        border-color: #6366f1;
+        background: #f8fafc;
+        transform: translateY(-2px);
+    }
+    
+    .option.selected {
+        border-color: #6366f1;
+        background: #eff6ff;
+    }
+    
+    .option.correct {
+        border-color: #22c55e;
+        background: #f0fdf4;
+    }
+    
+    .option.incorrect {
+        border-color: #ef4444;
+        background: #fef2f2;
+    }
+    
+    .result-message {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+        font-weight: 500;
+    }
+    
+    .result-message.correct {
+        background: #f0fdf4;
+        color: #166534;
+    }
+    
+    .result-message.incorrect {
+        background: #fef2f2;
+        color: #991b1b;
+    }
+    
+    @media (max-width: 768px) {
+        .qod-container {
+            margin: 10px;
+            border-radius: 10px;
+        }
+        
+        .qod-content {
+            padding: 15px;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+        }
+    }
+    </style>
+<div id="floating-ad-button" onclick="window.location.href='mcq/tea/';">
+    <img src="/media/photos/ad.png" alt="Ad Button" class="ad-img" >
+</div>
+<div class="container-h">
+    <!-- User Dashboard -->
+    <div class="category">
+        <h2>User Dashboard</h2>
+        <div class="grid">
+            <div class="square-button dash"  onclick="window.location.href='pomegranate/';">
+                
+                <div class="pomegranate-container">
+                    <img src="/media/photos/pom_home/pom.png" alt="Pomegranate Icon" class="pomegranate-img">
+                    <span>POMEGRANATE</span>
+                </div>
+                
+            </div>
+            <div class="square-button dash"  onclick="window.location.href='hive/';">
+                
+                <div class="pomegranate-container">
+                    <img src="/media/photos/hive.png" alt="Pomegranate Icon" class="pomegranate-img">
+                    <span>HIVE</span>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        .dash::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("/media/{{user.profile_image}}"); /* Replace with actual image path */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.5; /* Adjust opacity here */
+            z-index: -1;
+        }
+    
+    </style>
+    
+    <!-- Main Navigation Menu -->
+    <div class="category">
+        <h2>Main Navigation Menu</h2>
+        <div class="grid">
+            <div class="square-button pm" onclick="window.location.href='mcq/';">
+               
+                
+                <div >Practice MCQs</div>
+            </div>
+            <div class="square-button mt">
+                
+                <div>Mock Tests</div>
+            </div>
+            <div class="square-button bk" onclick="window.location.href='mcq/bookmarks/';">
+                
+                <div>Bookmarks</div>
+            </div>
+            
+            <div class="square-button sr">
+               
+                <div>Study Resources</div>
+            </div>
+        </div>
+    </div>
+    <div class="qod-container">
+        <div class="qod-header">
+            Question of the Day
+        </div>
+        <div class="qod-content">
+            <div id="loader" class="loader">
+                <div class="loader-spinner"></div>
+                <p style="margin-top: 20px; color: #6b7280;">Loading today's question...</p>
+            </div>
+            <div id="question-container" style="display: none;">
+                <p class="question-text" id="question-text"></p>
+                <img id="question-image" class="question-image" style="display: none;">
+                <div class="options-container" id="options-container"></div>
+                <div id="result-message" class="result-message" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Start Section -->
+    <div class="category">
+        <h2>Quick Start Section</h2>
+        <div class="grid">
+            <div class="square-button cls" onclick="window.location.href='mcq/cont_last_sess/';">
+                
+                <div>Continue Last Session</div>
+            </div>
+           
+        </div>
+    </div>
+
+    <!-- Performance Insights -->
+    <div class="category">
+        <h2>Performance Insights</h2>
+        <div class="grid">
+            <div class="square-button rs">
+                
+                <div>Recent Scores</div>
+            </div>
+            <div class="square-button rpt" onclick="window.location.href='mcq/rev_test_home/';">
+                
+                <div>Review Past Tests</div>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Leaderboards and Community -->
+    <div class="category">
+        <h2>Leaderboards and Community</h2>
+        <div class="grid">
+            <div class="square-button cr">
+                
+                <div>Current Rank</div>
+            </div>
+            <div class="square-button tp">
+                
+                <div>Top Performers</div>
+            </div>
+            <div class="square-button df">
+               
+                <div>Discussion Forums</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications and Updates -->
+    <div class="category">
+        <h2>Notifications and Updates</h2>
+        <div class="grid">
+            <div class="square-button ucmt">
+                
+                <div>Upcoming Mock Tests</div>
+            </div>
+            <div class="square-button sre">
+                
+                <div>Study Reminders</div>
+            </div>
+            <div class="square-button wa">
+                
+                <div>Website Announcements</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subscription and Offers -->
+    <div class="category">
+        <h2>Subscription and Offers</h2>
+        <div class="grid">
+            <div class="square-button ss">
+                
+                <div>Subscription Status</div>
+            </div>
+            <div class="square-button so">
+                
+                <div>Special Offers</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    
+
+    <!-- Help and Support -->
+    <div class="category">
+        <h2>Help and Support</h2>
+        <div class="grid">
+            <div class="square-button faq">
+                <div>FAQ</div>
+            </div>
+            <div class="square-button cs">
+                <div>Contact Support</div>
+            </div>
+            <div class="square-button ttr">
+                <div>Tutorials</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Button -->
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        fetchQuestionOfDay();
+    });
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    function fetchQuestionOfDay() {
+        fetch('/mcqs/qod/', {
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            setTimeout(() => displayQuestion(data), 1000); // Add a small delay for smooth transition
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('loader').innerHTML = `
+                <p style="color: #ef4444;">Failed to load question. Please try again later.</p>
+            `;
+        });
+    }
+    
+    function displayQuestion(question) {
+        const loader = document.getElementById('loader');
+        const questionContainer = document.getElementById('question-container');
+        const questionText = document.getElementById('question-text');
+        const questionImage = document.getElementById('question-image');
+        const optionsContainer = document.getElementById('options-container');
+    
+        // Hide loader and show question
+        loader.style.display = 'none';
+        questionContainer.style.display = 'block';
+    
+        // Set question text
+        questionText.textContent = question.text;
+    
+        // Handle image if present
+        if (question.has_image && question.image_url) {
+            questionImage.src = question.image_url;
+            questionImage.style.display = 'block';
+        } else {
+            questionImage.style.display = 'none';
+        }
+    
+        // Create options
+        optionsContainer.innerHTML = '';
+        question.options.forEach((option, index) => {
+            if (option) {  // Only create option if it's not null
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                optionDiv.textContent = option;
+                optionDiv.onclick = () => handleAnswerSelection(optionDiv, option, question.correct_answer);
+                optionsContainer.appendChild(optionDiv);
+            }
+        });
+    }
+    
+    function handleAnswerSelection(selectedElement, selectedAnswer, correctAnswer) {
+        // Remove previous selections
+        document.querySelectorAll('.option').forEach(option => {
+            option.classList.remove('selected', 'correct', 'incorrect');
+        });
+    
+        // Add selected class
+        selectedElement.classList.add('selected');
+    
+        // Show result
+        const resultMessage = document.getElementById('result-message');
+        const isCorrect = selectedAnswer === correctAnswer;
+    
+        selectedElement.classList.add(isCorrect ? 'correct' : 'incorrect');
+    
+        resultMessage.textContent = isCorrect 
+            ? '🎉 Correct! Well done!' 
+            : `❌ Incorrect. The correct answer is ${correctAnswer}.`;
+        resultMessage.className = `result-message ${isCorrect ? 'correct' : 'incorrect'}`;
+        resultMessage.style.display = 'block';
+    
+        // If answer was incorrect, highlight the correct answer
+        if (!isCorrect) {
+            document.querySelectorAll('.option').forEach(option => {
+                if (option.textContent === correctAnswer) {
+                    option.classList.add('correct');
+                }
+            });
+        }
+    }
+    </script>
+
+
+
+{% endblock %}
+
+{%block pp%}
+
+<li class="dropdown">
+    <a href="javascript:void(0)" class="dropbtn">
+      
+        <i class="fas fa-user-circle profile-icon"></i>
+      
+      {{ user.username }}
+      
+    </a>
+    <div class="dropdown-content">
+      <a href="#">Settings</a>
+      <a href={% url 'logout' %}>Logout</a>
+    </div>
+  </li>
+
+
+{%endblock%} 

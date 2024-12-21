@@ -1,0 +1,259 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+    <link rel="stylesheet" href="/media/css/rev_test.css">
+    <style>
+        .correct { background-color: green; color: white; font-weight: bold; }
+        .incorrect { background-color: red; color: white; font-weight: bold; }
+        .correct-option { background-color: blue; color: white; font-weight: bold; }
+        .mcq-card { margin-bottom: 30px; padding: 10px; border-radius: 5px; }
+        .options li { padding: 5px; margin: 5px 0; border-radius: 3px; cursor: pointer; }
+        .mcq-image { max-width: 100%; height: auto; margin-bottom: 10px; }
+        .share-icon {
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 10px;
+        }
+        .share-icon img {
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+        }
+        .share-icon1 {
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 10px;
+        }
+        .share-icon1 img {
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+        }
+        .overlay {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            top: 0; /* Stay at the top */
+            left: 0; /* Stay at the left */
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            background-color: rgba(0, 0, 0, 0.7); /* Black background with transparency */
+            z-index: 999; /* Sit on top of other elements */
+        }
+        @media (max-width: 768px) {
+            .share-icon img {
+                width: 24px;
+                height: 24px;
+            }
+        }
+    </style>
+
+    <div class="container">
+        <div class="test-overview">
+            <h2>Test Overview</h2>
+            <p><strong>Test Created At:</strong> {{ test_session.created_at }}</p>
+            <p><strong>Subjects:</strong> {{ test_session.selections|join:", " }}</p>
+            <p><strong>Total Questions:</strong> {{ test_session.total_questions|floatformat:0  }}</p>
+            <p><strong>Score:</strong> {{ test_session.score|floatformat:0  }}</p>
+            <p><strong>Total Time Taken:</strong> {{ test_session.timetaken_minutes }} minutes</p>
+            <div class="share-icon" title="Hive Test" onclick="openPopup()" data-id="{{ test_session.test_id }}" data-type="test">
+                <img src="/media/photos/hive.png" alt="Share Test Icon">
+            </div>
+        </div>
+
+        <div id="mcq-section">
+            <h2>MCQs</h2>
+            {% for mcq in mcq_data %}
+                <div class="mcq-card">
+                    <h3> {{ mcq.mcq_text }}</h3>
+                    
+                    <!-- Display the MCQ image if present -->
+                    {% if mcq.image %}
+                        <img src="{{ mcq.image }}" alt="MCQ Image" class="mcq-image">
+                    {% endif %}
+                    
+                    <ul class="options">
+                        {% for option in mcq.options %}
+                            <li class="{% if option.correct and option.selected %}correct
+                                       {% elif not option.correct and option.selected %}incorrect
+                                       {% elif option.correct and not option.selected and not mcq.is_attempted %}correct-option
+                                       {% elif option.correct and not option.selected and mcq.is_attempted and not mcq.correct %}correct-option
+                                       {% endif %}">
+                                {{ option.text }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <p><strong>Correct Answer:</strong> 
+                        {% for option in mcq.options %}
+                            {% if option.correct %}
+                                {{ option.text }}
+                            {% endif %}
+                        {% endfor %}
+                    </p>
+                    <p><strong>Explanation:</strong> {{ mcq.explanation }}</p>
+                    <div class="meta-info">
+                        <p><strong>Topic:</strong> {{ mcq.subject }} - {{ mcq.unit }} - {{ mcq.chapter }} - {{ mcq.topic }}</p>
+                        <p><strong>Difficulty Level:</strong> {{ mcq.difficulty }}</p>
+                        <p><strong>Type:</strong> {{ mcq.type }}</p>
+                        <p><strong>Time Spent:</strong> {{ mcq.time_spent }} seconds</p>
+                        
+                        <!-- Status Logic -->
+                        <p><strong>Status:</strong> 
+                            {% if mcq.is_attempted %}
+                                {% if mcq.correct %}Correct{% else %}Incorrect{% endif %}
+                            {% else %}
+                                Not Attempted
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="share-icon1" title="Hive MCQ" onclick="openPopup()" data-id="{{ mcq.mcq_uid }}" data-type="mcq"> 
+                        <img src="/media/photos/hive.png" alt="Share Test Icon">
+                    </div>
+                    <div class="feedback">
+                        <textarea placeholder="Leave feedback here..."></textarea>
+                        <button class="submit-feedback">Submit</button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="popup1" id="sharePopup">
+        <div class="popup-content1">
+            <h3>Select Connected Users to Share</h3>
+            <div class="connected-users">
+                {% for user in connected_users %}
+                <label>
+                    <input type="checkbox" class="user-checkbox" value="{{ user.id }}">
+                    {{ user.username }}
+                </label>
+                {% endfor %}
+            </div>
+            <div class="button-group">
+                <button class="share-button" onclick="closePopup()">Share</button>
+                <button class="cancel-button" onclick="closePopup()">Cancel</button>
+            </div>
+        </div>
+    </div>
+    <div class="overlay" id="overlay" aria-hidden="true"></div>  
+    <script>
+        function openPopup() {
+            document.getElementById('overlay').style.display = 'block'; // Show overlay
+            document.getElementById('sharePopup').style.display = 'block'; // Show popup
+            document.getElementById('overlay').setAttribute('aria-hidden', 'false');
+            document.getElementById('sharePopup').setAttribute('aria-hidden', 'false');
+        }
+        
+        function closePopup() {
+            document.getElementById('overlay').style.display = 'none'; // Hide overlay
+            document.getElementById('sharePopup').style.display = 'none'; // Hide popup
+            document.getElementById('overlay').setAttribute('aria-hidden', 'true');
+            document.getElementById('sharePopup').setAttribute('aria-hidden', 'true');
+        }
+        document.addEventListener("DOMContentLoaded", function () {
+            // Function to handle the share functionality
+            function handleShare() {
+                const shareButtons = document.querySelectorAll('.share-icon, .share-icon1');
+                const sharePopup = document.getElementById("sharePopup");
+                const shareButton = document.querySelector('.share-button');
+                const cancelButton = document.querySelector(".cancel-button");
+                let currentId;
+                let currentType;
+        
+                // Show the share popup
+                shareButtons.forEach(button => {
+                    button.addEventListener("click", () => {
+                        currentId = button.getAttribute("data-id");
+                        currentType = button.getAttribute("data-type");
+                        sharePopup.style.display = "block"; // Show the popup
+                    });
+                });
+        
+                // Cancel button to close the popup
+                cancelButton.addEventListener("click", () => {
+                    sharePopup.style.display = "none"; // Hide the popup
+                });
+        
+                // Share button functionality
+                shareButton.addEventListener("click", async () => {
+                    const selectedUsers = Array.from(document.querySelectorAll(".user-checkbox:checked")).map(cb => cb.value);
+        
+                    // Check for the number of selected users
+                    if (selectedUsers.length > 1) {
+                        alert("Not allowed to share with more than 3 users.");
+                        return;
+                    }
+        
+                    let fetchUrl;
+                    if (currentType === 'test') {
+                        fetchUrl = `/hive/share-test/${currentId}/`;
+                    } else if (currentType === 'mcq') {
+                        fetchUrl = `/hive/share-bookmark/${currentId}/`;
+                    } else {
+                        alert('Invalid share type!');
+                        return;
+                    }
+        
+                    try {
+                        const response = await fetch(fetchUrl, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': getCookie('csrftoken'),  // CSRF token for protection
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ users: selectedUsers })  // Send selected user IDs as JSON
+                        });
+        
+                        // Handle the response
+                        if (response.ok) {
+                            const result = await response.json();
+                            alert(result.message);  // Show success message
+                            sharePopup.style.display = "none";  // Hide the popup
+                        } else {
+                            const errorData = await response.json();
+                            alert("Error: " + errorData.error);  // Display error message
+                        }
+                    } catch (error) {
+                        alert("Error sharing: " + error.message);  // Catch network errors
+                    }
+                });
+            }
+        
+            // Initialize share functionality for both test and MCQ icons
+            handleShare();
+        
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+        });
+        
+    </script>
+    {% endblock %}
+
+    {%block pp%}
+    
+    <li class="dropdown">
+        <a href="javascript:void(0)" class="dropbtn">
+          
+            <i class="fas fa-user-circle profile-icon"></i>
+          
+          {{ user.username }}
+          
+        </a>
+        <div class="dropdown-content">
+          <a href="#">Settings</a>
+          <a href={% url 'logout' %}>Logout</a>
+        </div>
+      </li>
+    
+    
+    {%endblock%} 

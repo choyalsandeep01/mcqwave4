@@ -1,0 +1,191 @@
+/* General Styling */
+body {
+    
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Crimson Theme */
+h1, h2, h3 {
+    color: crimson;
+}
+
+button {
+    background-color: crimson;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+
+/* Test Session Section */
+.test-session {
+    background-color: #fff;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+h1, h2, h3 {
+    font-size: 1rem;
+}
+.test-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    font-size: 0.9rem;
+}
+
+.test-info p {
+    margin: 5px 0;
+    padding: 5px;
+}
+
+/* Question Details Section */
+.question-details {
+    background-color: #fff;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.question-content {
+    margin-top: 20px;
+}
+
+.question-img {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Options Styling */
+.options {
+    margin: 20px 0;
+}
+
+.option-box {
+    background-color: #f1f1f1;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 0.9rem;
+}
+
+
+
+.correct-answer {
+    background-color: #acebbb;
+}
+
+/* Status Badges */
+.question-meta {
+    margin-top: 20px;
+}
+
+.status-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.badge {
+    background-color: crimson;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    
+}
+
+.difficulty {
+    background-color: darkred;
+}
+
+.correct {
+    background-color: #28a745;
+}
+
+.incorrect {
+    background-color: #dc3545;
+}
+
+.not_attempted {
+    background-color: #ffc107;
+}
+
+/* Feedback Section */
+.feedback {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    resize: none;
+}
+.graphs {
+    margin-bottom: 50px;
+}
+
+/* Container for graphs */
+.graph-container {
+    width: 100%;
+    height: 250px; /* Fixed height for better responsiveness */
+    margin: 0 auto; /* Centering the charts */
+    display: flex;
+    flex-direction: column; /* Stack charts vertically */
+    justify-content: center; /* Center contents */
+}
+
+/* Adjust canvas size for responsiveness */
+.graphs canvas {
+    width: 100% !important; /* Ensure canvas uses full width */
+    height: auto !important; /* Maintain aspect ratio */
+}
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    h1, h2, h3 {
+        font-size: 1rem;
+    }
+
+    .test-info {
+        flex-direction: column;
+    }
+
+    
+
+    button, a {
+        padding: 8px 16px;
+    }
+   
+    
+    .graph-container {
+        height: 200px; /* Smaller height for mobile */
+    }
+}

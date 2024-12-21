@@ -1,0 +1,168 @@
+body {
+    font-family: "Roboto Condensed", sans-serif;
+    padding: 0px;
+    background-color: #f0f2f5; /* Softer background color */
+}
+
+.container {
+    max-width: 600px;
+    margin: 20px auto;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Softer shadow for a modern look */
+}
+
+h2 {
+    margin-top: 20px;
+    font-size: 22px;
+    color: #333;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #004aad; /* Adding a border for emphasis */
+    padding-bottom: 5px;
+}
+
+.dropdowns,
+.quiz-settings,
+.difficulty-options,
+.question-type,
+.question-availability {
+    margin-bottom: 20px;
+}
+
+.dropdowns select,
+.quiz-settings input,
+.quiz-settings select,
+.difficulty-options select,
+.question-type select,
+.question-availability select {
+    width: 100%;
+    padding: 12px; /* Improved padding for a more comfortable look */
+    border: 1px solid #b4b5; /* Blue border to match the theme */
+    border-radius: 0px; /* Rounded corners */
+    background-color: #f9f9f9;
+    color: #333;
+    transition: border-color 0.3s ease, background-color 0.3s ease; /* Smooth transition effects */
+    font-size: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Subtle shadow to give depth */
+    margin-bottom: 10px;
+    border-radius:20px;
+}
+
+.dropdowns select:hover,
+.quiz-settings input:hover,
+.quiz-settings select:hover,
+.difficulty-options select:hover,
+.question-type select:hover,
+.question-availability select:hover {
+    border-color: #0056b3; /* Darker blue on hover */
+    background-color: #e6f0ff; /* Light blue background on hover */
+}
+
+.add-btn,
+.start-test-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background-color: #004aad;
+    color: white;
+    border: none;
+    border-radius: 8px; /* Rounded corners */
+    margin-bottom: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Smooth transition effects */
+}
+
+.add-btn:hover,
+.start-test-btn:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a shadow on hover for depth */
+}
+
+ul#selectionList {
+    list-style-type: none;
+    padding: 0;
+}
+
+ul#selectionList li {
+    background-color: #004aad;
+    color: white;
+    padding: 10px;
+    margin-bottom: 5px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    transition: background-color 0.3s ease;
+}
+
+ul#selectionList li:hover {
+    background-color: #0056b3; /* Darker on hover */
+}
+
+ul#selectionList li .remove-btn {
+    background-color: #ff4d4d;
+    border: none;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+ul#selectionList li .remove-btn:hover {
+    background-color: #cc0000; /* Darker red on hover */
+}
+.alert {
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 4px;
+    font-size: 16px;
+    font-family: Arial, sans-serif;
+    transition: all 0.3s ease;
+}
+
+/* Different styles based on the message tags */
+.alert.info {
+    background-color: #d9edf7;
+    color: #31708f;
+    border: 1px solid #bce8f1;
+}
+
+.alert.success {
+    background-color: #dff0d8;
+    color: #3c763d;
+    border: 1px solid #d6e9c6;
+}
+
+.alert.warning {
+    background-color: #fcf8e3;
+    color: #8a6d3b;
+    border: 1px solid #faebcc;
+}
+
+.alert.error {
+    background-color: #f2dede;
+    color: #a94442;
+    border: 1px solid #ebccd1;
+}
+@media (max-width: 600px) {
+    .dropdowns select,
+    .quiz-settings input,
+    .quiz-settings select,
+    .difficulty-options select,
+    .question-type select,
+    .question-availability select {
+        font-size: 14px;
+    }
+
+    ul#selectionList li {
+        font-size: 14px;
+    }
+
+    ul#selectionList li .remove-btn {
+        padding: 3px 7px;
+    }
+}

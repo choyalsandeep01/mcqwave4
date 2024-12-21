@@ -1,0 +1,218 @@
+{% extends 'base/base.html' %}
+{% block content %}
+<link rel="stylesheet" href="/media/css/pomegranate/pom_cus_test_wise.css">
+<div class="container">
+
+    <!-- Section 1: Test Session Overview -->
+    <section class="test-session">
+        <h1>Test Session Overview</h1>
+        <div class="test-info">
+            <p><strong>Created At:</strong> {{ test_session.created_at }}</p>
+            <p><strong>Selections:</strong> {{ test_session.selections|join:", " }}</p>
+            <p><strong>Total Questions:</strong> {{ test_session.total_questions|floatformat:0 }}</p>
+            <p><strong>Score:</strong> {{ test_session.score|floatformat:0 }}</p>
+            <p><strong>Time Taken:</strong> {{ test_session.timetaken_minutes }} minutes</p>
+        </div>
+    </section>
+
+    <!-- Section 2: Question Analysis Graphs -->
+    <div class="container">
+        <!-- Test Session Overview and Questions Section Here -->
+    
+        <!-- Section: Graphs -->
+        <section class="graphs">
+            <h2>Test Analysis</h2>
+            <div class="graph-container">
+            <!-- Total Questions Chart -->
+            <canvas id="totalQuestionsChart"></canvas>
+            </div>
+            <div class="graph-container">
+           
+            <!-- Type-wise Chart -->
+            <canvas id="typeWiseChart"></canvas>
+            </div>
+            <div class="graph-container">
+            <!-- Difficulty Level Chart -->
+            <canvas id="difficultyLevelChart"></canvas>
+            </div>
+        </section>
+    </div>
+    
+
+    <!-- Section 3: Question Details -->
+    {% for question in questions %}
+    <section class="question-details">
+        <h2>Question {{ forloop.counter }}: {{ question.question_text }}</h2>
+        <div class="question-content">
+            {% if question.image %}
+            <img src="{{ question.image }}" alt="Question Image" class="question-img">
+            {% endif %}
+            <div class="options">
+                <p><strong>Options:</strong></p>
+                <div class="option-box {% if question.options.0 == question.correct_option %}correct-answer{% endif %}">
+                    {{ question.options.0 }}
+                </div>
+                <div class="option-box {% if question.options.1 == question.correct_option %}correct-answer{% endif %}">
+                    {{ question.options.1 }}
+                </div>
+                <div class="option-box {% if question.options.2 == question.correct_option %}correct-answer{% endif %}">
+                    {{ question.options.2 }}
+                </div>
+                <div class="option-box {% if question.options.3 == question.correct_option %}correct-answer{% endif %}">
+                    {{ question.options.3 }}
+                </div>
+            </div>
+            <div class="question-meta">
+                <p><strong>Explanation:</strong> {{ question.explanation }}</p>
+                <div class="status-badges">
+                    <span class="badge topic">{{ question.hierarchy }}</span>
+                    <span class="badge difficulty">{{ question.difficulty }}</span>
+                    <span class="badge type">{{ question.type }}</span>
+                    <span class="badge result {% if question.is_correct %}correct{% elif not question.is_attempted %}not-attempted{% else %}incorrect{% endif %}">
+                        {% if question.is_correct %}
+                            Correct
+                        {% elif not question.is_attempted %}
+                            Not Attempted
+                        {% else %}
+                            Incorrect
+                        {% endif %}
+                    </span>
+                    <span class="badge type">Time Spent(seconds):  {{ question.time_spent }}</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    {% endfor %}
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const pieChartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top',
+                labels: {
+                    boxWidth: 15,
+                }
+            },
+        },
+        scales: {
+            x: { display: false }, // Keep X axis hidden
+            y: { display: false }  // Keep Y axis hidden
+        },
+        layout: {
+            padding: {
+                top: 0,
+                bottom: 0
+            }
+        },
+        animation: {
+            duration: 800,  // Duration of the animation in milliseconds
+            easing: 'easeOutBounce' // Animation easing function
+        }
+    };
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top',
+                labels: {
+                    boxWidth: 15,
+                }
+            }
+        }
+    };
+
+    const totalQuestionsData = {
+        labels: ['Correct', 'Incorrect', 'Not Attempted'],
+        datasets: [{
+            label: 'Total Questions',
+            data: [{{ total_correct }}, {{ total_incorrect }}, {{ total_not_attempted }}],
+            backgroundColor: ['#4CAF50', '#F44336', '#FFC107']
+        }]
+    };
+
+    const typeWiseData = {
+        labels: ['Clinical', 'Image', 'General'],
+        datasets: [ {
+            label: 'Total Questions',
+            data: [{{ type_counts.clinical.total }}, {{ type_counts.image.total }}, {{ type_counts.general.total }}],
+            backgroundColor: '#004aad' // Choose a color for the total questions dataset
+        },{
+            label: 'Correct',
+            data: [{{ type_counts.clinical.correct }}, {{ type_counts.image.correct }}, {{ type_counts.general.correct }}],
+            backgroundColor: '#4CAF50'
+        }, {
+            label: 'Incorrect',
+            data: [{{ type_counts.clinical.incorrect }}, {{ type_counts.image.incorrect }}, {{ type_counts.general.incorrect }}],
+            backgroundColor: '#F44336'
+        }, {
+            label: 'Not Attempted',
+            data: [{{ type_counts.clinical.not_attempted }}, {{ type_counts.image.not_attempted }}, {{ type_counts.general.not_attempted }}],
+            backgroundColor: '#FFC107'
+        }]
+    };
+
+    const difficultyLevelData = {
+        labels: ['Easy', 'Medium', 'Tough'],
+        datasets: [{
+            label: 'Total Questions',
+            data: [{{ difficulty_counts.easy.total }}, {{ difficulty_counts.medium.total }}, {{ difficulty_counts.tough.total }}],
+            backgroundColor: '#004aad' // Choose a color for the total questions dataset
+        },{
+            label: 'Correct',
+            data: [{{ difficulty_counts.easy.correct }}, {{ difficulty_counts.medium.correct }}, {{ difficulty_counts.tough.correct }}],
+            backgroundColor: '#4CAF50'
+        }, {
+            label: 'Incorrect',
+            data: [{{ difficulty_counts.easy.incorrect }}, {{ difficulty_counts.medium.incorrect }}, {{ difficulty_counts.tough.incorrect }}],
+            backgroundColor: '#F44336'
+        }, {
+            label: 'Not Attempted',
+            data: [{{ difficulty_counts.easy.not_attempted }}, {{ difficulty_counts.medium.not_attempted }}, {{ difficulty_counts.tough.not_attempted }}],
+            backgroundColor: '#FFC107'
+        }]
+    };
+
+    new Chart(document.getElementById('totalQuestionsChart'), {
+        type: 'pie',
+        data: totalQuestionsData,
+        options: pieChartOptions
+    });
+    new Chart(document.getElementById('typeWiseChart'), {
+        type: 'bar',
+        data: typeWiseData,
+        options: chartOptions
+    });
+    new Chart(document.getElementById('difficultyLevelChart'), {
+        type: 'bar',
+        data: difficultyLevelData,
+        options: chartOptions
+    });
+</script>
+
+{% endblock %}
+{%block pp%}
+
+<li class="dropdown">
+    <a href="javascript:void(0)" class="dropbtn">
+      
+        <i class="fas fa-user-circle profile-icon"></i>
+      
+      {{ user.username }}
+      
+    </a>
+    <div class="dropdown-content">
+      <a href="#">Settings</a>
+      <a href={% url 'logout' %}>Logout</a>
+    </div>
+  </li>
+
+
+{%endblock%} 

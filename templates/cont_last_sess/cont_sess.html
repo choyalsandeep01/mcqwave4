@@ -1,0 +1,72 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Continue{% endblock title %}
+
+{% block content %}
+<link rel="stylesheet" href="/media/css/cont_sess.css">
+
+<h2>Continue to Last Session</h2>
+<div class="table-container">
+    <table class="styled-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Selections</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for test in unsubmitted_tests %}
+            <tr>
+                <td>{{ test.created_at|date:"M d, Y H:i" }}</td>
+                <td>
+                    <button class="toggle-button" onclick="toggleMenu({{ test.id }})">
+                        View Selections
+                    </button>
+                    <div class="selection-menu" id="menu-{{ test.id }}">
+                        <div class="menu-content">
+                            <ul class="selection-list">
+                                {% for selection in test.selections %}
+                                <li>{{ selection }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <button class="continue-button" onclick="continueTest('{{ test.test_id }}')">Continue Test</button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" class="no-tests">No unsubmitted tests found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    function toggleMenu(id) {
+        const menu = document.getElementById(`menu-${id}`);
+        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function continueTest(testId) {
+        window.location.href = `/mcqs/restest/${testId}`;
+    }
+</script>
+{% endblock %}
+
+{% block pp %}
+<li class="dropdown">
+    <a href="javascript:void(0)" class="dropbtn">
+        <i class="fas fa-user-circle profile-icon"></i>
+        {{ user.username }}
+    </a>
+    <div class="dropdown-content">
+        <a href="#">Settings</a>
+        <a href="{% url 'logout' %}">Logout</a>
+    </div>
+</li>
+{% endblock %}

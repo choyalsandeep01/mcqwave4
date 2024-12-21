@@ -1,0 +1,146 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Home-Register{% endblock title %}
+
+{% block content %}
+<link rel="stylesheet" href="/media/css/signup.css">
+<style>
+.password-toggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+}
+
+.form-group {
+    position: relative;
+}
+
+.form-group input[type="password"],
+.form-group input[type="text"] {
+    padding-right: 35px;
+}
+</style>
+
+<div class="signup-container">
+    <div class="signup-box">
+        <h2>Register Here</h2>
+        <form method="POST" id="signupForm">
+            {% csrf_token %}
+            {% include "base/alert.html" %}
+            <div class="form-group">
+                <label for="first_name">First Name</label>
+                <input type="text" id="first_name" name="first_name">
+            </div>
+            <div class="form-group">
+                <label for="last_name">Last Name</label>
+                <input type="text" id="last_name" name="last_name">
+            </div>
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username">
+                <small id="usernameFeedback" style="color: red; display: none;">
+                    Username cannot contain spaces, uppercase letters, or special characters.
+                </small>
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div style="position: relative;">
+                    <input type="password" id="password" name="password">
+                    <svg class="password-toggle" onclick="togglePassword('password')" id="password-toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path class="eye-open" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle class="eye-open" cx="12" cy="12" r="3"></circle>
+                        <path class="eye-closed" d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" style="display: none"></path>
+                        <line class="eye-closed" x1="1" y1="1" x2="23" y2="23" style="display: none"></line>
+                    </svg>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password</label>
+                <div style="position: relative;">
+                    <input type="password" id="confirm_password" name="confirm_password">
+                    <svg class="password-toggle" onclick="togglePassword('confirm_password')" id="confirm-password-toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path class="eye-open" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle class="eye-open" cx="12" cy="12" r="3"></circle>
+                        <path class="eye-closed" d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" style="display: none"></path>
+                        <line class="eye-closed" x1="1" y1="1" x2="23" y2="23" style="display: none"></line>
+                    </svg>
+                </div>
+                <small id="passwordFeedback" style="color: red; display: none;">
+                    Passwords do not match!
+                </small>
+            </div>
+            <button type="submit">Signup</button>
+            <p>Already have an account? <a href="/login">Login</a></p>
+            <p>Email is not verified? <a href="/resend_email">Resend Email Verification Link</a></p>
+        </form>
+    </div>
+</div>
+
+<script>
+// Username validation
+document.getElementById('username').addEventListener('input', function() {
+    const username = this.value;
+    const feedback = document.getElementById('usernameFeedback');
+    const isValid = /^[a-z0-9]+$/.test(username);
+
+    if (!isValid) {
+        feedback.style.display = 'block';
+    } else {
+        feedback.style.display = 'none';
+    }
+});
+
+// Password visibility toggle
+function togglePassword(inputId) {
+    const passwordInput = document.getElementById(inputId);
+    const toggleIcon = document.getElementById(inputId === 'password' ? 'password-toggle' : 'confirm-password-toggle');
+    const openEyePaths = toggleIcon.querySelectorAll('.eye-open');
+    const closedEyePaths = toggleIcon.querySelectorAll('.eye-closed');
+
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        openEyePaths.forEach(path => path.style.display = 'none');
+        closedEyePaths.forEach(path => path.style.display = 'block');
+    } else {
+        passwordInput.type = 'password';
+        openEyePaths.forEach(path => path.style.display = 'block');
+        closedEyePaths.forEach(path => path.style.display = 'none');
+    }
+}
+
+// Password matching validation
+document.getElementById('signupForm').addEventListener('submit', function(e) {
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirm_password').value;
+    const passwordFeedback = document.getElementById('passwordFeedback');
+
+    if (password !== confirmPassword) {
+        e.preventDefault();
+        passwordFeedback.style.display = 'block';
+    } else {
+        passwordFeedback.style.display = 'none';
+    }
+});
+
+// Real-time password matching validation
+document.getElementById('confirm_password').addEventListener('input', function() {
+    const password = document.getElementById('password').value;
+    const confirmPassword = this.value;
+    const passwordFeedback = document.getElementById('passwordFeedback');
+
+    if (password !== confirmPassword) {
+        passwordFeedback.style.display = 'block';
+    } else {
+        passwordFeedback.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

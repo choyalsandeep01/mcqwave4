@@ -1,0 +1,269 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dynamic Dropdowns with Additional Segments</title>
+<link rel="stylesheet" href="/media/css/cusmcq.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anek+Devanagari:wght@100..800&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <div class="container">
+        {% include "base/alert.html" %}
+        <!-- Segment 1: Dynamic Dropdowns -->
+        <h2>Select Topics</h2>
+    <div class="dropdowns">
+        <select id="subjectDropdown" onchange="handleSubjectChange()">
+            <option value="">Select Subject</option>
+            {% for subject, units in data.items %}
+                <option value="{{ subject }}">{{ subject }}</option>
+            {% endfor %}
+        </select>
+
+        <select id="unitDropdown" onchange="handleUnitChange()">
+            <option value="">Select Unit</option>
+        </select>
+
+        <select id="chapterDropdown" onchange="handleChapterChange()">
+            <option value="">Select Chapter</option>
+        </select>
+
+        <select id="topicDropdown" onchange="handleTopicChange()">
+            <option value="">Select Topic</option>
+        </select>
+    </div>
+
+        <button onclick="addSelection()" class="add-btn">Add Selection</button>
+
+        <ul id="selectionList">
+            <!-- Selections will appear here -->
+        </ul>
+
+        <!-- Segment 2: Question Type Options -->
+        <h2>Question Type</h2>
+        <div class="question-type">
+            <label>Select Question Type:</label>
+            <select id="questionType">
+                <option value="mixed">Mixed</option>
+                <option value="clinical">Clinical</option>
+                <option value="image">Image</option>
+                <option value="general">General</option>
+                
+            </select>
+        </div>
+        <h2>Difficulty Level</h2>
+        <div class="difficulty-options">
+            <label>Select Difficulty:</label>
+            <select id="difficultyLevel">
+                <option value="mixed">Mixed</option>
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="tough">Tough</option>
+                
+            </select>
+        </div>
+        <!-- Segment 3: New or New+Old Questions -->
+        <h2>Question Availability</h2>
+        <div class="question-availability">
+            <label>Select Question Availability:</label>
+            <select id="questionAvailability">
+                <option value="new">New Questions</option>
+                <option value="new+old">New + Old (Solved) Questions</option>
+            </select>
+        </div>
+
+        <!-- Segment 4: Quiz Settings -->
+        <h2>Quiz Settings</h2>
+        <div class="quiz-settings">
+            <label for="numQuestions">Enter Number of Questions (max 40):</label>
+            <input type="number" id="numQuestions" name="numQuestions" min="1" max="40">
+
+        
+
+            <div id="timerInput" >
+                <label for="timePerQuestion">Enter Time per Question (in minutes):</label>
+                <input type="number" id="timePerQuestion" name="timePerQuestion" min="10" max="300">
+            </div>
+
+            
+        </div>
+
+        <!-- Segment 5: Difficulty Options -->
+        
+
+        <!-- Segment 6: Start Test Button -->
+        <button onclick="startTest()" class="start-test-btn" >START TEST</button>
+
+    </div>
+
+    <script>
+
+        const data = {{ data|safe }};
+
+    function handleSubjectChange() {
+        const subjectDropdown = document.getElementById("subjectDropdown");
+        const unitDropdown = document.getElementById("unitDropdown");
+        const chapterDropdown = document.getElementById("chapterDropdown");
+        const topicDropdown = document.getElementById("topicDropdown");
+
+        const selectedSubject = subjectDropdown.value;
+        unitDropdown.innerHTML = '<option value="">Select Unit</option>';
+        chapterDropdown.innerHTML = '<option value="">Select Chapter</option>';
+        topicDropdown.innerHTML = '<option value="">Select Topic</option>';
+
+        if (selectedSubject && data[selectedSubject]) {
+            Object.keys(data[selectedSubject]).forEach(unit => {
+                unitDropdown.innerHTML += `<option value="${unit}">${unit}</option>`;
+            });
+        }
+    }
+
+    function handleUnitChange() {
+        const subjectDropdown = document.getElementById("subjectDropdown");
+        const unitDropdown = document.getElementById("unitDropdown");
+        const chapterDropdown = document.getElementById("chapterDropdown");
+        const topicDropdown = document.getElementById("topicDropdown");
+
+        const selectedSubject = subjectDropdown.value;
+        const selectedUnit = unitDropdown.value;
+        chapterDropdown.innerHTML = '<option value="">Select Chapter</option>';
+        topicDropdown.innerHTML = '<option value="">Select Topic</option>';
+
+        if (selectedSubject && selectedUnit && data[selectedSubject][selectedUnit]) {
+            Object.keys(data[selectedSubject][selectedUnit]).forEach(chapter => {
+                chapterDropdown.innerHTML += `<option value="${chapter}">${chapter}</option>`;
+            });
+        }
+    }
+
+    function handleChapterChange() {
+        const subjectDropdown = document.getElementById("subjectDropdown");
+        const unitDropdown = document.getElementById("unitDropdown");
+        const chapterDropdown = document.getElementById("chapterDropdown");
+        const topicDropdown = document.getElementById("topicDropdown");
+
+        const selectedSubject = subjectDropdown.value;
+        const selectedUnit = unitDropdown.value;
+        const selectedChapter = chapterDropdown.value;
+        topicDropdown.innerHTML = '<option value="">Select Topic</option>';
+
+        if (selectedSubject && selectedUnit && selectedChapter && data[selectedSubject][selectedUnit][selectedChapter]) {
+            data[selectedSubject][selectedUnit][selectedChapter].forEach(topic => {
+                topicDropdown.innerHTML += `<option value="${topic}">${topic}</option>`;
+            });
+        }
+    }
+
+    function handleTopicChange() {
+        addSelection();
+    }
+
+    function addSelection() {
+        const subjectDropdown = document.getElementById("subjectDropdown");
+        const unitDropdown = document.getElementById("unitDropdown");
+        const chapterDropdown = document.getElementById("chapterDropdown");
+        const topicDropdown = document.getElementById("topicDropdown");
+    
+        const selectedSubject = subjectDropdown.value;
+        const selectedUnit = unitDropdown.value;
+        const selectedChapter = chapterDropdown.value;
+        const selectedTopic = topicDropdown.value;
+    
+        const selectionList = document.getElementById("selectionList");
+        const currentSelections = selectionList.querySelectorAll("li").length;
+    
+        // Check if there are already 5 selections
+        if (currentSelections >= 5) {
+            alert("Maximum 5 selections are possible at a time.");
+            return;
+        }
+    
+        let address = selectedSubject;
+    
+        if (selectedUnit) address += `-${selectedUnit}`;
+        if (selectedChapter) address += `-${selectedChapter}`;
+        if (selectedTopic) address += `-${selectedTopic}`;
+    
+        if (address && !isAddressInList(address)) {
+            const li = document.createElement("li");
+            li.innerHTML = `${address} <button class="remove-btn" onclick="removeSelection(this)">Remove</button>`;
+            selectionList.appendChild(li);
+        }
+    }
+    
+    function isAddressInList(address) {
+        const listItems = document.querySelectorAll('#selectionList li');
+        for (let item of listItems) {
+            if (item.textContent.includes(address)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    function removeSelection(button) {
+        const li = button.parentElement;
+        li.remove();
+    }
+    
+    
+
+    function startTest() {
+        const selections = [];
+        document.querySelectorAll('#selectionList li').forEach((li) => {
+            selections.push(li.textContent.replace(' Remove', ''));
+        });
+        
+        const questionType = document.getElementById("questionType").value;
+        const questionAvailability = document.getElementById("questionAvailability").value;
+        const numQuestions = document.getElementById("numQuestions").value;
+        const timePerQuestion = document.getElementById("timePerQuestion").value;
+        
+        const difficultyLevel = document.getElementById("difficultyLevel").value;
+        console.log('Selections:', selections);
+        console.log({
+            selections,
+            questionType,
+            questionAvailability,
+            numQuestions,
+            
+            timePerQuestion,
+            
+            difficultyLevel
+        });
+        const queryString = new URLSearchParams({
+            selections: JSON.stringify(selections),
+            questionType,
+            questionAvailability,
+            numQuestions,
+            
+            timePerQuestion,
+            
+            difficultyLevel
+        }).toString();
+       console.log(queryString);
+       alert("Test is starting....");
+        window.location.href = `test/?${queryString}`;
+        
+    }
+
+    </script>
+    {%endblock%}
+    {%block pp%}
+
+<li class="dropdown">
+    <a href="javascript:void(0)" class="dropbtn">
+      
+        <i class="fas fa-user-circle profile-icon"></i>
+      
+      {{ user.username }}
+      
+    </a>
+    <div class="dropdown-content">
+      <a href="#">Settings</a>
+      <a href={% url 'logout' %}>Logout</a>
+    </div>
+  </li>
+
+
+{%endblock%} 

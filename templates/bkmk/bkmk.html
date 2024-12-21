@@ -1,0 +1,775 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Bookmarks{% endblock title %}
+
+
+
+{% block content %}
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f0f4f8;
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* Internet Explorer/Edge */
+            user-select: none; 
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .delete-bookmark {
+            background: none;
+            border: none;
+            color: red;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        
+        .delete-bookmark:hover {
+            color: darkred;
+        }
+        h1 {
+            text-align: center;
+            color: #004aad;
+            font-size: 36px;
+            margin-bottom: 20px;
+            animation: fadeInDown 1s ease-in-out;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: space-around;
+            background-color: #004aad;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            padding: 10px 0;
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            padding: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .tab.active {
+            background-color: #002f6c;
+        }
+
+        .tab:hover {
+            background-color: #003f8b;
+        }
+
+        .category-content {
+            display: none;
+        }
+
+        .category-content.active {
+            display: block;
+            animation: fadeInUp 1s ease-in-out;
+        }
+
+        .filters {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .filter {
+            flex: 1;
+            margin: 0 10px;
+        }
+
+        .filter select, .filter input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .mcq-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .mcq-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+        }
+
+        .mcq-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .mcq-card h3 {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .mcq-card p {
+            font-size: 12px;
+            color: #555;
+            margin-bottom: 15px;
+        }
+
+        .category-label {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: #004aad;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        /* MCQ Options */
+        .mcq-options {
+            margin-bottom: 15px;
+        }
+
+        .mcq-options button {
+            width: 100%;
+            background-color: #f0f4f8;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .mcq-options button.correct {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .mcq-options button.incorrect {
+            background-color: #F44336;
+            color: white;
+        }
+
+        .mcq-options button.disabled {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        /* MCQ Info */
+        .mcq-info {
+            font-size: 14px;
+            color: #777;
+            margin-bottom: 10px;
+        }
+
+        .mcq-explanation {
+            display: none;
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .pagination button {
+            background-color: #004aad;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
+            margin: 0 5px;
+            transition: background-color 0.3s;
+        }
+        .overlay {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            top: 0; /* Stay at the top */
+            left: 0; /* Stay at the left */
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            background-color: rgba(0, 0, 0, 0.7); /* Black background with transparency */
+            z-index: 999; /* Sit on top of other elements */
+        }
+        .popup1 {
+            display: none; /* Initially hidden */
+            position: fixed; /* Fixed position */
+            left: 50%; /* Center horizontally */
+            top: 50%; /* Center vertically */
+            transform: translate(-50%, -50%); /* Translate to center */
+            background: #ffffff; /* White background */
+            padding: 20px; /* Padding around content */
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* Soft shadow */
+            z-index: 1000; /* Above other elements */
+            max-width: 90%; /* Responsive max width */
+            width: 400px; /* Fixed width for larger screens */
+            transition: all 0.3s ease; /* Smooth transition */
+        }
+        
+        .popup-content1 h3 {
+            margin-bottom: 15px; /* Margin below heading */
+            font-family: 'Arial', sans-serif; /* Modern font */
+            font-size: 1.5em; /* Increased font size */
+            color: #333; /* Dark text color */
+        }
+        
+        .popup1 .connected-users {
+            max-height: 200px; /* Max height */
+            overflow-y: auto; /* Scroll if overflow */
+            margin-bottom: 20px; /* Margin below connected users */
+            padding-right: 10px; /* Padding for scrollbar */
+        }
+        
+        .popup1 .connected-users label {
+            display: flex; /* Flex for layout */
+            align-items: center; /* Center items */
+            padding: 8px; /* Padding for label */
+            border-radius: 4px; /* Rounded corners */
+            transition: background-color 0.3s; /* Smooth background transition */
+        }
+        
+        .popup1 .connected-users label:hover {
+            background-color: #f0f0f0; /* Light background on hover */
+        }
+        
+        .popup1 .button-group {
+            display: flex; /* Flex container for buttons */
+            justify-content: flex-end; /* Align buttons to the right */
+        }
+        
+        .popup1 .share-button, .popup1 .cancel-button {
+            padding: 10px 20px; /* Padding for buttons */
+            margin-right: 10px; /* Space between buttons */
+            border: none; /* Remove border */
+            border-radius: 4px; /* Rounded corners */
+            font-size: 1em; /* Font size */
+            cursor: pointer; /* Pointer cursor */
+            transition: background-color 0.3s; /* Smooth background transition */
+        }
+        
+        .popup1 .share-button {
+            background-color: #4CAF50; /* Green background */
+            color: white; /* White text */
+        }
+        
+        .popup1 .share-button:hover {
+            background-color: #45a049; /* Darker green on hover */
+        }
+        
+        .popup1 .cancel-button {
+            background-color: #f44336; /* Red background */
+            color: white; /* White text */
+        }
+        
+        .popup1 .cancel-button:hover {
+            background-color: #e53935; /* Darker red on hover */
+        }
+        
+        .pagination button:hover {
+            background-color: #003f8b;
+        }
+
+        .pagination .active-page {
+            background-color: #002f6c;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .popup {
+            display: none; /* Hidden by default */
+            position: fixed; 
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto; 
+            background-color: rgba(0, 0, 0, 0.5); /* Black w/ opacity */
+        }
+        .popup-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 300px;
+            text-align: center;
+            border-radius: 10px;
+        }
+        .popup button {
+            margin: 10px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .popup .yes {
+            background-color: #d9534f;
+            color: white;
+        }
+        .popup .no {
+            background-color: #5bc0de;
+            color: white;
+        }
+        .share-bookmark {
+            background: none; /* Removes any default button background */
+            border: none; /* Removes any border around the button */
+            padding: 0; /* Removes any internal padding */
+            margin: 0; /* Removes any margin */
+            cursor: pointer; /* Adds pointer cursor for better UX */
+            display: inline-block; /* Ensures button takes only as much space as its content */
+            box-shadow: none; /* Removes any shadow */
+            margin-left:55px;
+        }
+        
+        /* Style for the share icon inside the button */
+        .share-bookmark .icon-share {
+            width: 24px; /* Set desired width for the icon */
+            height: auto; /* Maintain the aspect ratio */
+            display: inline-block; /* Ensures image stays inline */
+            vertical-align: middle; /* Align icon with text, if any */
+            background: none; /* Ensures the image itself has no background */
+            border: none; /* Remove any borders around the image */
+            padding: 0; /* Remove any padding */
+            margin: 0; /* Remove any margin */
+            box-shadow: none; /* Ensure no shadows on the image */
+        }
+        
+        /* On hover/focus state for better interaction */
+        .share-bookmark:hover,
+        .share-bookmark:focus {
+            outline: none; /* Removes outline on focus */
+            background: none; /* Ensures no background appears on hover */
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .mcq-card {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 28px;
+            }
+            .tab {
+                font-size: 14px;
+            }
+            .share-bookmark .icon-share {
+                width: 20px; /* Resize for tablets */
+            }
+            .popup1 {
+                width: 90%; /* Full width on small screens */
+            }
+        
+            .popup-content1 h3 {
+                font-size: 1.2em; /* Smaller font size on mobile */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Your Bookmarked MCQs</h1>
+        <div class="popup" id="confirmDeletePopup">
+            <div class="popup-content">
+                <h3>Are you sure you want to delete this bookmark?</h3>
+                <button class="yes">Yes</button>
+                <button class="no">No</button>
+            </div>
+        </div>
+        <!-- Tab navigation -->
+        <div class="tabs">
+            <div class="tab active" data-category="starred">Starred MCQs</div>
+            <div class="tab" data-category="unsolved">Unsolved / Unstudied</div>
+            <div class="tab" data-category="other">Other MCQs</div>
+        </div>
+    
+        <!-- Starred Category -->
+        <div class="category-content active" id="starred">
+            <div class="mcq-list">
+                {% for bookmark in star_mcqs %}
+                <div class="mcq-card" id="bookmark-{{ bookmark.bkmk_id }}">
+                    <span class="category-label">Star</span>
+                    <h3>{{ bookmark.mcq.text }}</h3>
+                    {% if bookmark.mcq.image %}
+                    <div>
+                        <img src="{{ bookmark.mcq.image.url }}" alt="MCQ Image" style="max-width: 100%;">
+                    </div>
+                    {% endif %}
+                    <div class="mcq-info">
+                        <p><strong>Subject:</strong> {{ bookmark.mcq.topic.chapter.unit.subject.name }} | <strong>Unit:</strong> {{ bookmark.mcq.topic.chapter.unit.name }} | <strong>Chapter:</strong> {{ bookmark.mcq.topic.chapter.name }} | <strong>Topic:</strong> {{ bookmark.mcq.topic.name }}</p>
+                        <p><strong>Type:</strong> {{ bookmark.mcq.types }} | <strong>Difficulty:</strong> {{ bookmark.mcq.difficulty }}</p>
+                        <p><strong>Test Session:</strong> {{ bookmark.test_session.name }}</p>
+                        <p><strong>Bookmarked On:</strong> {{ bookmark.created_at }}</p>
+                    </div>
+                    <div class="mcq-options">
+                        <button data-correct="{% if bookmark.mcq.option_1 == bookmark.mcq.correct_option %}true{% else %}false{% endif %}">{{ bookmark.mcq.option_1 }}</button>
+                        <button data-correct="{% if bookmark.mcq.option_2 == bookmark.mcq.correct_option %}true{% else %}false{% endif %}">{{ bookmark.mcq.option_2 }}</button>
+                        <button data-correct="{% if bookmark.mcq.option_3 == bookmark.mcq.correct_option %}true{% else %}false{% endif %}">{{ bookmark.mcq.option_3 }}</button>
+                        <button data-correct="{% if bookmark.mcq.option_4 == bookmark.mcq.correct_option %}true{% else %}false{% endif %}">{{ bookmark.mcq.option_4 }}</button>
+                    </div>
+                    <button class="delete-bookmark" data-id="{{ bookmark.bkmk_id }}">
+                        <i class="fa fa-trash" aria-hidden="true"></i> <!-- Font Awesome Trash Icon -->
+                    </button>
+                    <button class="share-bookmark" data-id="{{ bookmark.mcq.uid }}" onclick="openPopup()">
+                        <img src="/media/photos/hive.png" alt="Share Icon" class="icon-share">
+                    </button>
+                    {% if bookmark.mcq.explanation %}
+                    <div class="mcq-explanation">
+                        <p>{{ bookmark.mcq.explanation }}</p>
+                    </div>
+                    {% endif %}
+                    
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Unsolved/Unstudied Category -->
+        <div class="category-content" id="unsolved">
+            <div class="mcq-list">
+                {% for bookmark in unstudied_mcqs %}
+                <div class="mcq-card" id="bookmark-{{ bookmark.bkmk_id }}">
+                    <span class="category-label">Unsolved / Unstudied</span>
+                    <h3>{{ bookmark.mcq.text }}</h3>
+                    {% if bookmark.mcq.image %}
+                    <div>
+                        <img src="{{ bookmark.mcq.image.url }}" alt="MCQ Image" style="max-width: 100%;">
+                    </div>
+                    {% endif %}
+                    <div class="mcq-info">
+                        <p><strong>Subject:</strong> {{ bookmark.mcq.topic.chapter.unit.subject.name }} | <strong>Unit:</strong> {{ bookmark.mcq.topic.chapter.unit.name }} | <strong>Chapter:</strong> {{ bookmark.mcq.topic.chapter.name }} | <strong>Topic:</strong> {{ bookmark.mcq.topic.name }}</p>
+                        <p><strong>Type:</strong> {{ bookmark.mcq.types }} | <strong>Difficulty:</strong> {{ bookmark.mcq.difficulty }}</p>
+                        <p><strong>Test Session:</strong> {{ bookmark.test_session.name }}</p>
+                        <p><strong>Bookmarked On:</strong> {{ bookmark.created_at }}</p>
+                    </div>
+                    <div class="mcq-options">
+                        <button data-correct="{% if bookmark.mcq.option_1 == bookmark.mcq.correct_option %}true{% else %}false{% endif %}">{{ bookmark.mcq.option_1 }}</button>
+                        <button data-correct="{% if bookmark.mcq.option_2 == bookmark.mcq.correct_option %}true{% else %}false{% endif %}">{{ bookmark.mcq.option_2 }}</button>
+                        <button data-correct="{% if bookmark.mcq.option_3 == bookmark.mcq.correct_option %}true{% else %}false{% endif %}">{{ bookmark.mcq.option_3 }}</button>
+                        <button data-correct="{% if bookmark.mcq.option_4 == bookmark.mcq.correct_option %}true{% else %}false{% endif %}">{{ bookmark.mcq.option_4 }}</button>
+                    </div>
+                    <button class="delete-bookmark" data-id="{{ bookmark.bkmk_id }}">
+                        <i class="fa fa-trash" aria-hidden="true"></i> <!-- Font Awesome Trash Icon -->
+                    </button>
+                    <button class="share-bookmark" data-id="{{ bookmark.mcq.uid }}" onclick="openPopup()">
+                        <img src="/media/photos/hive.png" alt="Share Icon" class="icon-share">
+                    </button>
+                    {% if bookmark.mcq.explanation %}
+                    <div class="mcq-explanation">
+                        <p>{{ bookmark.mcq.explanation }}</p>
+                    </div>
+                    {% endif %}
+                    
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Other Category -->
+        <div class="category-content" id="other">
+            <div class="mcq-list">
+                {% for bookmark in other_mcqs %}
+                <div class="mcq-card" id="bookmark-{{ bookmark.bkmk_id }}">
+                    <span class="category-label">Other</span>
+                    <h3>{{ bookmark.mcq.text }}</h3>
+                    {% if bookmark.mcq.image %}
+                    <div>
+                        <img src="{{ bookmark.mcq.image.url }}" alt="MCQ Image" style="max-width: 100%;">
+                    </div>
+                    {% endif %}
+                    <div class="mcq-info">
+                        <p><strong>Subject:</strong> {{ bookmark.mcq.topic.chapter.unit.subject.name }} | <strong>Unit:</strong> {{ bookmark.mcq.topic.chapter.unit.name }} | <strong>Chapter:</strong> {{ bookmark.mcq.topic.chapter.name }} | <strong>Topic:</strong> {{ bookmark.mcq.topic.name }}</p>
+                        <p><strong>Type:</strong> {{ bookmark.mcq.types }} | <strong>Difficulty:</strong> {{ bookmark.mcq.difficulty }}</p>
+                        <p><strong>Test Session:</strong> {{ bookmark.test_session.name }}</p>
+                        <p><strong>Bookmarked On:</strong> {{ bookmark.created_at }}</p>
+                    </div>
+                    <div class="mcq-options">
+                        <button data-correct="{% if bookmark.mcq.option_1 == bookmark.mcq.correct_option %}true{% else %}false{% endif %}">{{ bookmark.mcq.option_1 }}</button>
+                        <button data-correct="{% if bookmark.mcq.option_2 == bookmark.mcq.correct_option %}true{% else %}false{% endif %}">{{ bookmark.mcq.option_2 }}</button>
+                        <button data-correct="{% if bookmark.mcq.option_3 == bookmark.mcq.correct_option %}true{% else %}false{% endif %}">{{ bookmark.mcq.option_3 }}</button>
+                        <button data-correct="{% if bookmark.mcq.option_4 == bookmark.mcq.correct_option %}true{% else %}false{% endif %}">{{ bookmark.mcq.option_4 }}</button>
+                    </div>
+                    <button class="delete-bookmark" data-id="{{ bookmark.bkmk_id }}">
+                        <i class="fa fa-trash" aria-hidden="true"></i> <!-- Font Awesome Trash Icon -->
+                    </button>
+                    <button class="share-bookmark" data-id="{{ bookmark.mcq.uid }}" onclick="openPopup()">
+                        <img src="/media/photos/hive.png" alt="Share Icon" class="icon-share">
+                    </button>
+                    {% if bookmark.mcq.explanation %}
+                    <div class="mcq-explanation">
+                        <p>{{ bookmark.mcq.explanation }}</p>
+                    </div>
+                    {% endif %}
+                    
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="popup1" id="sharePopup">
+        <div class="popup-content1">
+            <h3>Select Connected Users to Share</h3>
+            <div class="connected-users">
+                {% for user in connected_users %}
+                <label>
+                    <input type="checkbox" class="user-checkbox" value="{{ user.id }}">
+                    {{ user.username }}
+                </label>
+                {% endfor %}
+            </div>
+            <div class="button-group">
+                <button class="share-button" onclick="closePopup()">Share</button>
+                <button class="cancel-button" onclick="closePopup()">Cancel</button>
+            </div>
+        </div>
+    </div>
+<div class="overlay" id="overlay" aria-hidden="true"></div>  
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const tabs = document.querySelectorAll(".tab");
+            const categoryContents = document.querySelectorAll(".category-content");
+            const mcqCards = document.querySelectorAll(".mcq-card");
+    
+            // Tab functionality
+            tabs.forEach(tab => {
+                tab.addEventListener("click", () => {
+                    tabs.forEach(t => t.classList.remove("active"));
+                    categoryContents.forEach(c => c.classList.remove("active"));
+                    
+                    tab.classList.add("active");
+                    const category = tab.getAttribute("data-category");
+                    document.getElementById(category).classList.add("active");
+                });
+            });
+    
+            // MCQ Options functionality
+            mcqCards.forEach(mcqCard => {
+                const buttons = mcqCard.querySelectorAll(".mcq-options button");
+                const explanation = mcqCard.querySelector(".mcq-explanation");
+    
+                buttons.forEach(button => {
+                    button.addEventListener("click", () => {
+                        buttons.forEach(b => b.classList.add("disabled"));  // Disable all buttons
+                        
+                        // Highlight the correct answer in green
+                        buttons.forEach(b => {
+                            if (b.getAttribute("data-correct") === "true") {
+                                b.classList.add("correct");
+                            } else if (b === button && b.getAttribute("data-correct") === "false") {
+                                b.classList.add("incorrect");
+                            }
+                        });
+                        explanation.style.display = "block";  // Show explanation
+                    });
+                });
+            });
+            const deleteButtons = document.querySelectorAll(".delete-bookmark");
+            const popup = document.getElementById("confirmDeletePopup");
+            const yesButton = popup.querySelector(".yes");
+            const noButton = popup.querySelector(".no");
+            let currentBookmarkId;
+
+            deleteButtons.forEach(button => {
+                button.addEventListener("click", () => {
+                    currentBookmarkId = button.getAttribute("data-id");
+                    popup.style.display = "block"; // Show the popup
+                });
+            });
+
+            yesButton.addEventListener("click", async () => {
+                if (currentBookmarkId) {
+                    const response = await fetch(`/mcqs/delete-bookmark/${currentBookmarkId}/`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken'), // Get CSRF token
+                        },
+                    });
+
+                    if (response.ok) {
+                        // Remove the bookmark card from the DOM
+                        const bookmarkCard = document.getElementById(`bookmark-${currentBookmarkId}`);
+                        bookmarkCard.remove();
+                    } else {
+                        alert("Error deleting the bookmark.");
+                    }
+                    popup.style.display = "none"; // Hide the popup after deletion
+                }
+            });
+
+            noButton.addEventListener("click", () => {
+                popup.style.display = "none"; // Hide the popup on "No"
+            });
+
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+        });
+        document.addEventListener("DOMContentLoaded", function () {
+            const shareButtons = document.querySelectorAll(".share-bookmark");
+            const sharePopup = document.getElementById("sharePopup");
+            const shareButton = document.querySelector(".share-button");
+            const cancelButton = document.querySelector(".cancel-button");
+            let currentBookmarkId;
+        
+            // Function to show the share popup
+            shareButtons.forEach(button => {
+                button.addEventListener("click", () => {
+                    currentBookmarkId = button.getAttribute("data-id");
+                    sharePopup.style.display = "block"; // Show the popup
+                });
+            });
+        
+            // Cancel button to close the popup
+            cancelButton.addEventListener("click", () => {
+                sharePopup.style.display = "none"; // Hide the popup
+            });
+        
+            // Share button functionality
+            shareButton.addEventListener("click", async () => {
+                const selectedUsers = Array.from(document.querySelectorAll(".user-checkbox:checked")).map(cb => cb.value);
+        
+                if (selectedUsers.length > 3) {
+                    alert("Not allowed to share with more than 3 users.");
+                    return;
+                }
+                
+                // Make sure you have a valid bookmark ID and selected users
+                if (currentBookmarkId && selectedUsers.length > 0) {
+                    try {
+                        const response = await fetch(`/hive/share-bookmark/${currentBookmarkId}/`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': getCookie('csrftoken'),  // CSRF token for protection
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ users: selectedUsers })  // Send selected user IDs as JSON
+                        });
+            
+                        // Handle the response
+                        if (response.ok) {
+                            const result = await response.json();
+                            alert(result.message);  // Show success message
+                            sharePopup.style.display = "none";  // Hide the popup
+                        } else {
+                            const errorData = await response.json();
+                            const errorMessage = errorData.shared_at 
+                                ? `Error: ${errorData.error}. Last shared at: ${errorData.shared_at}` 
+                                : `Error: ${errorData.error}`;  // Check if shared_at is present
+                            alert(errorMessage);  // Display error message
+                        }
+                    } catch (error) {
+                        alert("Error sharing the MCQ: " + error.message);  // Catch network errors
+                    }
+                } else {
+                    alert("No users selected or bookmark ID is missing.");
+                }
+            });
+        
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+        });
+        function openPopup() {
+            document.getElementById('overlay').style.display = 'block'; // Show overlay
+            document.getElementById('sharePopup').style.display = 'block'; // Show popup
+            document.getElementById('overlay').setAttribute('aria-hidden', 'false');
+            document.getElementById('sharePopup').setAttribute('aria-hidden', 'false');
+        }
+        
+        function closePopup() {
+            document.getElementById('overlay').style.display = 'none'; // Hide overlay
+            document.getElementById('sharePopup').style.display = 'none'; // Hide popup
+            document.getElementById('overlay').setAttribute('aria-hidden', 'true');
+            document.getElementById('sharePopup').setAttribute('aria-hidden', 'true');
+        }
+    </script>
+    
+    {% endblock %}
+
+    {%block pp%}
+    
+    <li class="dropdown">
+        <a href="javascript:void(0)" class="dropbtn">
+          
+            <i class="fas fa-user-circle profile-icon"></i>
+          
+          {{ user.username }}
+          
+        </a>
+        <div class="dropdown-content">
+          <a href="#">Settings</a>
+          <a href={% url 'logout' %}>Logout</a>
+        </div>
+      </li>
+    
+    
+    {%endblock%} 

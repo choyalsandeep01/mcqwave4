@@ -1,0 +1,176 @@
+{% extends 'base/base.html' %}
+{% block title %}Shared Content with {{ connected_user.username }}{% endblock %}
+
+{% block content %}
+    <link rel="stylesheet" href="/media/css/hive/hive_share.css">
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <h2><strong> {{ connected_user.username }}</strong></h2>
+        </div>
+
+        <div class="chat-content" id="chat-content">
+            {% if items %}
+                <div class="chat-messages">
+                    {% for item in items %}
+                        {% if item.type == 'mcq' %}
+                            <div class="message {% if item.data.shared_by == 'me' %}message-sent{% else %}message-received{% endif %}">
+                                <div class="message-content mcq-container">
+                                    <strong>{{ item.data.shared_by }} :</strong>
+                                    
+                                    <p>Question: <strong>{{ item.data.text }}</strong></p>
+                                    {% if item.data.image %}
+                                        <div class="mcq-image">
+                                            <img src="{{ item.data.image }}" alt="MCQ Image">
+                                        </div>
+                                    {% endif %}
+                                    <ul class="mcq-options" data-correct-option="{{ item.data.correct_option }}">
+                                        {% for option in item.data.options %}
+                                            <li class="mcq-option" data-option="{{ option }}">
+                                                {{ option }}
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+
+                                    <div class="mcq-hierarchy">
+                                        <p><strong>Topic:</strong> {{ item.data.hierarchy }}</p>
+                                        <p><strong>Difficulty:</strong> {{ item.data.difficulty }}</p>
+                                        <p><strong>Type:</strong> {{ item.data.type }}</p>
+                                    </div>
+                                    <div class="mcq-explanation" style="display: none;">
+                                        <p><strong>Explanation:</strong> {{ item.data.explanation }}</p>
+                                    </div>
+                                </div>
+                                <strong>{{ item.data.shared_at }}</strong>
+                            </div>
+                        {% elif item.type == 'test_session' %}
+                            <div class="message {% if item.data.shared_by == 'me' %}message-sent{% else %}message-received{% endif %}">
+                                <div class="message-content test-container">
+                                    <strong>{{ item.data.shared_by }} shared a Test Session at {{ item.data.shared_at }}</strong>
+                                    <p><strong>Test ID:</strong> {{ item.data.test_id }}</p>  <!-- Display test_id only -->
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>No shared content yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const chatContent = document.getElementById("chat-content");
+            const chatMessages = chatContent.querySelector(".chat-messages");
+
+            // Scroll to the bottom of the chat when the page loads
+            if (chatMessages) {
+                chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to the bottom
+            }
+
+            console.log("DOM fully loaded and parsed.");  // Added for debugging
+    
+            document.querySelectorAll('.mcq-options').forEach(optionList => {
+                const correctOption = optionList.getAttribute('data-correct-option');  // Get correct option from data attribute
+                console.log("Correct option:", correctOption);  // Check correct option value
+    
+                // Ensure correctOption exists
+                if (!correctOption) {
+                    console.error("No correct option found.");
+                    return;
+                }
+    
+                let startY = 0;
+                let isScrolling = false; // Flag to track if we are scrolling
+    
+                // Function to handle option selection
+                function handleOptionSelection(option, optionList) {
+                    // Check if an option has already been selected
+                    if (optionList.querySelector('.selected')) {
+                        console.log("An option has already been selected.");
+                        return; // If an option is already selected, prevent further selections
+                    }
+    
+                    const selectedOption = option.getAttribute('data-option');  // Get clicked option's data-option
+                    console.log("Selected option:", selectedOption);  // Added for debugging
+    
+                    // Disable further selections
+                    optionList.querySelectorAll('.mcq-option').forEach(opt => {
+                        opt.style.pointerEvents = 'none';  // Disable all options after a selection
+                    });
+    
+                    // Mark the selected option
+                    option.classList.add('selected');  // Highlight the clicked option
+    
+                    // Check if the selected option is correct
+                    if (selectedOption === correctOption) {
+                        option.classList.add('correct');  // Mark the option as correct
+                        console.log("Correct answer selected!");
+                    } else {
+                        option.classList.add('incorrect');  // Mark the option as incorrect
+                        console.log("Incorrect answer selected!");
+                        // Highlight the correct option
+                        const correctOptElement = optionList.querySelector(`[data-option="${correctOption}"]`);
+                        if (correctOptElement) {
+                            correctOptElement.classList.add('correct');  // Mark the correct answer with the 'correct' class
+                        }
+                    }
+    
+                    // Show explanation after selection
+                    const explanationElement = optionList.parentElement.querySelector('.mcq-explanation');  // Find explanation div
+                    if (explanationElement) {
+                        explanationElement.style.display = 'block';  // Display the explanation below the question
+                    }
+                }
+    
+                // Attach event listeners for touch events
+                optionList.querySelectorAll('.mcq-option').forEach(option => {
+                    option.addEventListener('touchstart', function(e) {
+                        startY = e.touches[0].clientY; // Get the initial touch position
+                        isScrolling = false; // Reset scrolling flag
+                    });
+    
+                    option.addEventListener('touchmove', function(e) {
+                        let currentY = e.touches[0].clientY;
+                        let distance = currentY - startY;
+    
+                        // If the distance moved exceeds a certain threshold, we are scrolling
+                        if (Math.abs(distance) > 10) {
+                            isScrolling = true; // Set flag to true
+                        }
+                    });
+    
+                    option.addEventListener('touchend', function(e) {
+                        if (isScrolling) {
+                            // If we were scrolling, don't handle selection
+                            return; 
+                        }
+    
+                        // If not scrolling, handle option selection
+                        handleOptionSelection(option, optionList);
+                    });
+    
+                    // Add click event as fallback for non-touch devices
+                    option.addEventListener('click', function() {
+                        handleOptionSelection(option, optionList);
+                    });
+                });
+            });
+        });
+    </script>
+
+{% endblock %}
+
+{% block pp %}
+    <li class="dropdown">
+        <a href="javascript:void(0)" class="dropbtn">
+            <i class="fas fa-user-circle profile-icon"></i>
+            {{ user.username }}
+        </a>
+        <div class="dropdown-content">
+            <a href="#">Settings</a>
+            <a href="{% url 'logout' %}">Logout</a>
+        </div>
+    </li>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends 'base/base.html' %}
+
+
+{% block content %}
+
+
+   
+<link rel="stylesheet" href="/media/css/pomegranate/pom_home.css">
+
+    <div class="container">
+       
+            <h1 class="pom_home_h1">MCQwave POMEGRANATE</h1>
+            <p class="pom_home_p">Unlock advanced graphical analysis with our latest feature.</p>
+       
+        <main>
+            <div class="image-container">
+                <img src="/media/photos/pom_home/pom.png" alt="Pomegranate" class="pomegranate-img">
+            </div>
+            <div class="button-container">
+                <button class="btn" id="overall" onclick="window.location.href='pomegranate_overall/';">Overall</button>
+                <button class="btn" id="subject-wise" onclick="window.location.href='pomegranate_sub/';">Subject-Wise</button>
+                <button class="btn" id="custom" onclick="window.location.href='custome_ana/';">Custom</button>
+            </div>
+        </main>
+        
+    </div>
+    
+    {% endblock %}
+
+{%block pp%}
+
+<li class="dropdown">
+    <a href="javascript:void(0)" class="dropbtn">
+      
+        <i class="fas fa-user-circle profile-icon"></i>
+      
+      {{ user.username }}
+      
+    </a>
+    <div class="dropdown-content">
+      <a href="#">Settings</a>
+      <a href={% url 'logout' %}>Logout</a>
+    </div>
+  </li>
+
+
+{%endblock%} 

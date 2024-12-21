@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<!-- Created By CodingNepal - www.codingnepalweb.com -->
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>{%block title %}MCQwave{% endblock%}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/media/css/bases.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anek+Devanagari:wght@100..800&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    
+  </head>
+  <body>
+    <header>
+    <nav>
+      <input type="checkbox" id="check">
+      
+      <label class="logo">MCQwave</label>
+      <label for="check" class="checkbtn">
+        <i class="fas fa-bars"></i>
+      </label>
+      <ul>
+        <li><a class="active" href="/">Home</a></li>
+        <li><a href="#">About</a></li>
+        
+        <li><a href="#">Contact</a></li>
+        <li><a href="#">Feedback</a></li>
+        {% block pp%}
+        {%endblock%}
+        {% comment %} <li class="dropdown">
+          <a href="javascript:void(0)" class="dropbtn">
+            
+              <i class="fas fa-user-circle profile-icon"></i>
+            
+            My Account
+          </a>
+          <div class="dropdown-content">
+            <a href="#">Settings</a>
+            <a href="#">Logout</a>
+          </div>
+        </li> {% endcomment %}
+        
+      </ul>
+    </nav>
+  </header>
+
+    {% block content %}
+    {% endblock  %}
+  
+{% block footer %}
+    
+    
+    <footer>
+      <div class="footer-container">
+        <div class="footer-content">
+          <ul class="footer-links">
+            <li><a href="#">Terms and Conditions</a></li>
+            <li><a href="#">Refund Policy</a></li>
+            <li><a href="#">Shipping and Delivery Policy</a></li>
+            <li><a href="#">Contact Us</a></li>
+          </ul>
+          <p class="footer-text">© 2024 MCQwave. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+    {% endblock %}
+  </body>
+</html>
