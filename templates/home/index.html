@@ -216,6 +216,47 @@
             font-size: 1.1rem;
         }
     }
+    .qod-header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .reload-button {
+        
+        border: none;
+        color: white !important;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .reload-button:hover {
+        
+        transform: scale(1.1);
+    }
+    
+    .reload-button i {
+        font-size: 20px;
+    }
+    
+    @keyframes spin-reload {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+    
+    .reload-button.spinning i {
+        animation: spin-reload 1s linear infinite;
+    }
     </style>
 <div id="floating-ad-button" onclick="window.location.href='mcq/tea/';">
     <img src="/media/photos/ad.png" alt="Ad Button" class="ad-img" >
@@ -259,6 +300,9 @@
             opacity: 0.5; /* Adjust opacity here */
             z-index: -1;
         }
+        .rel:before{
+            color:white;
+        }
     
     </style>
     
@@ -288,7 +332,10 @@
     </div>
     <div class="qod-container">
         <div class="qod-header">
-            Question of the Day
+            <span>Questions of the Day</span>
+        <button class="reload-button" id="reload-question" title="Load new question">
+            <i class="fas fa-sync-alt rel"></i>
+        </button>
         </div>
         <div class="qod-content">
             <div id="loader" class="loader">
@@ -407,6 +454,26 @@
     <!-- Logout Button -->
     
 </div>
+<script>
+    // Add this to your existing JavaScript
+    document.getElementById('reload-question').addEventListener('click', function() {
+        // Add spinning animation
+        this.classList.add('spinning');
+        
+        // Hide previous question and show loader
+        document.getElementById('question-container').style.display = 'none';
+        document.getElementById('result-message').style.display = 'none';
+        document.getElementById('loader').style.display = 'flex';
+        
+        // Fetch new question
+        fetchQuestionOfDay();
+        
+        // Remove spinning class after animation completes
+        setTimeout(() => {
+            this.classList.remove('spinning');
+        }, 1000);
+    });
+    </script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         fetchQuestionOfDay();
