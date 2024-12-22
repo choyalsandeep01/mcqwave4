@@ -107,7 +107,7 @@ class MCQ(BaseModel):
         super(MCQ,self).save(*args,**kwargs)
 
 
-from datetime import datetime
+from django.utils import timezone
 
 class TestSession(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -116,7 +116,7 @@ class TestSession(models.Model):
     timestamp = models.DateTimeField(auto_now=True)  #t Track when the session was last updaed
     submitted = models.BooleanField(default=False)
     score = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    created_at = models.DateTimeField(default=datetime.now)
+    created_at = models.DateTimeField(default=timezone.now)
     total_questions = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     timetaken = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # Track when the session was created
     totaltime = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
